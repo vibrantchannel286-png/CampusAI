@@ -42,8 +42,12 @@
    Or manually create `.env.local` and copy the contents from `env.example.txt`
    
    Fill in your API keys:
-   - **Gemini API Key**: Get a free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - **Gemini API Key** (REQUIRED for chatbot and AI features): 
+     - Get a free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+     - Add it as `NEXT_PUBLIC_GEMINI_API_KEY` in `.env.local`
+     - **Important**: Without this key, the chatbot will not work and you'll see 403 errors
    - **Firebase Config**: Get your Firebase config from [Firebase Console](https://console.firebase.google.com)
+   - **Cron Secret** (for hourly updates): Generate a random string (e.g., `openssl rand -base64 32`) and add as `CRON_SECRET`
 
 4. **Set up Firebase**
    
@@ -78,7 +82,9 @@ CampusAI-1/
 │   └── jamb.json
 ├── pages/              # Next.js pages
 │   ├── api/
-│   │   └── chat.ts     # Chatbot API endpoint
+│   │   ├── chat.ts     # Chatbot API endpoint
+│   │   └── cron/
+│   │       └── update-search.ts  # Hourly update search cron job
 │   ├── school/
 │   │   └── [slug].tsx  # Dynamic university pages
 │   ├── _app.tsx
@@ -106,10 +112,20 @@ CampusAI-1/
    - Go to [vercel.com](https://vercel.com)
    - Click "New Project"
    - Import your GitHub repository
-   - Add environment variables from `.env.local`
+   - Add environment variables from `.env.local`:
+     - `NEXT_PUBLIC_GEMINI_API_KEY` (required for chatbot)
+     - All Firebase variables
+     - `CRON_SECRET` (for hourly update search)
    - Click "Deploy"
 
-3. **Your site will be live!**
+3. **Set up Cron Job for Hourly Updates**
+   - The cron job is automatically configured via `vercel.json`
+   - It runs every hour at `0 * * * *` (top of every hour)
+   - The endpoint `/api/cron/update-search` will be called automatically
+   - Make sure `CRON_SECRET` is set in Vercel environment variables
+   - You can manually trigger it by calling: `https://your-domain.vercel.app/api/cron/update-search` with `Authorization: Bearer YOUR_CRON_SECRET`
+
+4. **Your site will be live!**
 
 ### Firebase Hosting (Alternative)
 
@@ -134,8 +150,18 @@ The floating chatbot (bottom-right corner) can answer questions about:
 - Admission processes
 - And more!
 
+**Note**: The chatbot requires a valid `NEXT_PUBLIC_GEMINI_API_KEY` to function. Without it, users will see error messages. Make sure to set this environment variable in both development and production.
+
 ### Email Subscriptions
 Users can subscribe to receive email alerts when their chosen university posts new updates. Subscriptions are stored in Firebase Firestore.
+
+### Automated Update Search
+The system automatically searches for new updates every hour via a Vercel Cron Job:
+- Configured in `vercel.json`
+- Runs at the top of every hour
+- Searches all universities and JAMB for new updates
+- Stores new updates in Firestore (if configured)
+- Can be manually triggered for testing
 
 ### Search & Filter
 - Search across all updates by keywords

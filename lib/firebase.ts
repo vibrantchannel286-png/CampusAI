@@ -13,13 +13,18 @@ const firebaseConfig = {
 let app: FirebaseApp | undefined;
 let db: Firestore | undefined;
 
-if (typeof window !== 'undefined') {
+// Initialize Firebase for both client and server
+const isConfigValid = firebaseConfig.apiKey && firebaseConfig.projectId;
+
+if (isConfigValid) {
   if (!getApps().length) {
     app = initializeApp(firebaseConfig);
   } else {
     app = getApps()[0];
   }
   db = getFirestore(app);
+} else {
+  console.warn('Firebase configuration is incomplete. Some features may not work.');
 }
 
 export { db };

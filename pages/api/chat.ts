@@ -61,8 +61,17 @@ If asked about JAMB, direct them to /jamb for the latest information.`;
     const response = await chatWithGemini(message, context);
 
     return res.status(200).json({ response });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Chat API error:', error);
+    
+    // Check if it's an API key error
+    if (error.message?.includes('API Key') || error.status === 403) {
+      return res.status(500).json({ 
+        error: 'AI service configuration error',
+        response: "I'm sorry, the AI service is currently unavailable due to a configuration issue. Please check back later or visit our homepage for the latest updates."
+      });
+    }
+    
     return res.status(500).json({ 
       error: 'Failed to process chat message',
       response: "I'm sorry, I'm having trouble processing your request right now. Please try again later."
