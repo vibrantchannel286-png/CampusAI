@@ -1,17 +1,29 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
-
-if (!apiKey) {
-  console.warn('Warning: GEMINI_API_KEY is not set. AI features will not work properly.');
+// Get API key at runtime, not module load time
+function getApiKey(): string {
+  return process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
 }
 
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+function getGenAI() {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    return null;
+  }
+  try {
+    return new GoogleGenerativeAI(apiKey);
+  } catch (error) {
+    console.error('Error initializing Gemini AI:', error);
+    return null;
+  }
+}
 
 export async function summarizeText(text: string): Promise<string> {
-  // If no API key, return truncated text
+  const apiKey = getApiKey();
+  const genAI = getGenAI();
+  
+  // If no API key, return truncated text immediately
   if (!genAI || !apiKey) {
-    console.warn('Gemini API key not configured. Using fallback text truncation.');
     return text.substring(0, 150) + '...';
   }
 
@@ -24,16 +36,22 @@ export async function summarizeText(text: string): Promise<string> {
     const response = await result.response;
     return response.text();
   } catch (error: any) {
-    console.error('Error summarizing text:', error);
+    // Silently fall back to truncated text - don't log errors during build
+    // Only log in development or if it's not a 404 (which we've already fixed)
+    if (process.env.NODE_ENV === 'development' && error.status !== 404) {
+      console.error('Error summarizing text:', error.message || error);
+    }
     // Return truncated text as fallback
     return text.substring(0, 150) + '...';
   }
 }
 
 export async function chatWithGemini(userMessage: string, context?: string): Promise<string> {
+  const apiKey = getApiKey();
+  const genAI = getGenAI();
+  
   // If no API key, return helpful error message
   if (!genAI || !apiKey) {
-    console.error('Gemini API key not configured. Chat functionality unavailable.');
     return "I'm sorry, the AI service is currently unavailable. Please check the API configuration. For now, you can visit our homepage to see the latest updates from Nigerian universities and JAMB.";
   }
 
@@ -52,15 +70,20 @@ export async function chatWithGemini(userMessage: string, context?: string): Pro
     const response = await result.response;
     return response.text();
   } catch (error: any) {
-    console.error('Error in chat:', error);
+    // Log error details for debugging
+    console.error('Error in chat:', {
+      status: error.status,
+      message: error.message,
+      statusText: error.statusText
+    });
     
     // Provide more specific error messages
-    if (error.status === 403 || error.message?.includes('API Key')) {
+    if (error.status === 403 || error.message?.includes('API Key') || error.message?.includes('Forbidden')) {
       return "I'm sorry, there's an issue with the AI service configuration. Please contact the administrator.";
     }
     
-    if (error.status === 404 || error.message?.includes('404')) {
-      return "I'm sorry, there's an issue with the AI model configuration. The service is being updated. Please try again later.";
+    if (error.status === 404 || error.message?.includes('404') || error.message?.includes('Not Found')) {
+      return "I'm sorry, there's an issue with the AI model configuration. Please ensure you're using a valid Gemini API key and the latest model names.";
     }
     
     return "I'm sorry, I'm having trouble processing your request right now. Please try again later or check your internet connection.";
