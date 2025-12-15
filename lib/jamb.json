@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1",
+    "title": "JAMB 2026 Registration Opens",
+    "date": "2026-01-15",
+    "summary": "The Joint Admissions and Matriculation Board has announced the commencement of registration for the 2026 Unified Tertiary Matriculation Examination (UTME).",
+    "fullText": "The Joint Admissions and Matriculation Board (JAMB) has officially opened registration for the 2026 Unified Tertiary Matriculation Examination (UTME). Candidates are advised to visit approved Computer-Based Test (CBT) centers nationwide to complete their registration. The registration portal will remain open for six weeks, and candidates must ensure they meet all requirements before the closing date.",
+    "category": "Registration",
+    "sourceUrl": "https://www.jamb.gov.ng",
+    "deadline": "2026-03-01"
+  },
+  {
+    "id": "2",
+    "title": "JAMB 2026 Examination Dates Announced",
+    "date": "2026-02-10",
+    "summary": "JAMB has released the official examination dates for the 2026 UTME, scheduled to hold in April 2026 across various CBT centers.",
+    "fullText": "The Joint Admissions and Matriculation Board has announced that the 2026 Unified Tertiary Matriculation Examination will hold from April 19th to May 3rd, 2026. The examination will be conducted in multiple sessions across approved Computer-Based Test centers nationwide. Candidates are advised to print their examination slips one week before their scheduled examination date.",
+    "category": "Examination",
+    "sourceUrl": "https://www.jamb.gov.ng",
+    "deadline": "2026-04-19"
+  },
+  {
+    "id": "3",
+    "title": "JAMB Results Release Schedule",
+    "date": "2026-05-05",
+    "summary": "JAMB has announced that results for the 2026 UTME will be released within 48 hours after the conclusion of the examination.",
+    "fullText": "The Joint Admissions and Matriculation Board has assured candidates that results for the 2026 Unified Tertiary Matriculation Examination will be released promptly. Results will be accessible via the JAMB portal, SMS, and email notifications. Candidates are advised to check their results using their registration number and email address registered during application.",
+    "category": "Results",
+    "sourceUrl": "https://www.jamb.gov.ng",
+    "deadline": null
+  },
+  {
+    "id": "4",
+    "title": "CAPS Admission Process Guidelines",
+    "date": "2026-06-01",
+    "summary": "JAMB has released guidelines for the Central Admission Processing System (CAPS) for the 2026/2027 academic session.",
+    "fullText": "The Joint Admissions and Matriculation Board has issued comprehensive guidelines for the Central Admission Processing System (CAPS) for the 2026/2027 academic session. Institutions are expected to adhere strictly to the admission guidelines, and candidates are advised to monitor their admission status through the JAMB CAPS portal. All admissions must be processed through the CAPS system to ensure transparency and fairness.",
+    "category": "Admission",
+    "sourceUrl": "https://www.jamb.gov.ng",
+    "deadline": "2026-09-30"
+  },
+  {
+    "id": "5",
+    "title": "JAMB Registration Fee Update",
+    "date": "2026-01-10",
+    "summary": "JAMB has announced that the registration fee for the 2026 UTME remains N3,500, with additional service charges applicable.",
+    "fullText": "The Joint Admissions and Matriculation Board has confirmed that the registration fee for the 2026 Unified Tertiary Matriculation Examination remains N3,500. However, candidates will pay additional charges for reading text (N500), registration at CBT centers (N700), and service charges. Total registration cost is approximately N4,700. Candidates are advised to make payments only through approved channels to avoid falling victim to fraudsters.",
+    "category": "Registration",
+    "sourceUrl": "https://www.jamb.gov.ng",
+    "deadline": null
+  },
+  {
+    "id": "6",
+    "title": "JAMB Mop-up Examination Notice",
+    "date": "2026-05-20",
+    "summary": "JAMB has scheduled a mop-up examination for candidates who encountered technical difficulties during the main UTME.",
+    "fullText": "The Joint Admissions and Matriculation Board has announced a mop-up examination for candidates who experienced technical difficulties or biometric verification issues during the main UTME. Affected candidates will be notified via SMS and email. The mop-up examination is scheduled for May 25th, 2026, at designated centers. Only candidates with verified cases of technical issues will be eligible to participate.",
+    "category": "Examination",
+    "sourceUrl": "https://www.jamb.gov.ng",
+    "deadline": "2026-05-25"
+  }
+]
