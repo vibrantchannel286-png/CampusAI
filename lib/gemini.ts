@@ -57,6 +57,7 @@ export async function chatWithGemini(userMessage: string, context?: string): Pro
 
   try {
     // Use the current Gemini model (gemini-1.5-flash is faster and free, gemini-1.5-pro is more capable)
+    // Updated: 2024 - gemini-pro is deprecated, using gemini-1.5-flash
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
     const systemPrompt = `You are CampusAI, a helpful assistant for Nigerian university students and JAMB candidates. 
