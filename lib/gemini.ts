@@ -16,7 +16,8 @@ export async function summarizeText(text: string): Promise<string> {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // Use the current Gemini model (gemini-1.5-flash is faster and free, gemini-1.5-pro is more capable)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const prompt = `Summarize the following text in 2-3 sentences. Focus on the key information: ${text}`;
     
     const result = await model.generateContent(prompt);
@@ -37,7 +38,8 @@ export async function chatWithGemini(userMessage: string, context?: string): Pro
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // Use the current Gemini model (gemini-1.5-flash is faster and free, gemini-1.5-pro is more capable)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
     const systemPrompt = `You are CampusAI, a helpful assistant for Nigerian university students and JAMB candidates. 
     Provide accurate, helpful information about Nigerian universities and JAMB updates.
@@ -55,6 +57,10 @@ export async function chatWithGemini(userMessage: string, context?: string): Pro
     // Provide more specific error messages
     if (error.status === 403 || error.message?.includes('API Key')) {
       return "I'm sorry, there's an issue with the AI service configuration. Please contact the administrator.";
+    }
+    
+    if (error.status === 404 || error.message?.includes('404')) {
+      return "I'm sorry, there's an issue with the AI model configuration. The service is being updated. Please try again later.";
     }
     
     return "I'm sorry, I'm having trouble processing your request right now. Please try again later or check your internet connection.";

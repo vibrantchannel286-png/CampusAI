@@ -1,0 +1,5 @@
+# Note: .env files are ignored by .gitignore, so git-crypt is not needed.
+# If you want to track and encrypt .env files instead of ignoring them,
+# remove the .env* patterns from .gitignore and uncomment the lines below:
+# .env* filter=git-crypt diff=git-crypt
+# *.local filter=git-crypt diff=git-crypt
