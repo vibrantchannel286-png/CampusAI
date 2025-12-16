@@ -118,12 +118,13 @@ CampusAI-1/
      - `CRON_SECRET` (for hourly update search)
    - Click "Deploy"
 
-3. **Set up Cron Job for Hourly Updates**
+3. **Set up Cron Job for Daily Updates**
    - The cron job is automatically configured via `vercel.json`
-   - It runs every hour at `0 * * * *` (top of every hour)
+   - It runs once per day at `0 0 * * *` (midnight UTC) - Hobby plan limitation
    - The endpoint `/api/cron/update-search` will be called automatically
    - Make sure `CRON_SECRET` is set in Vercel environment variables
    - You can manually trigger it by calling: `https://your-domain.vercel.app/api/cron/update-search` with `Authorization: Bearer YOUR_CRON_SECRET`
+   - **Note**: Vercel Hobby plan limits cron jobs to once per day. Upgrade to Pro for more frequent runs.
 
 4. **Your site will be live!**
 
