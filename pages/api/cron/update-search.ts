@@ -47,19 +47,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     createdAt: Timestamp.now(),
                     updatedAt: Timestamp.now(),
                   });
+                  // Only add to allUpdates if successfully saved to Firestore
                   allUpdates.push(update);
                   console.log(`Added new update: ${update.title}`);
                 }
               } catch (error) {
                 console.error(`Error checking/adding update ${update.id}:`, error);
-                // Still collect the update even if Firestore fails
-                allUpdates.push(update);
+                // Do NOT add to allUpdates if Firestore save failed
+                // This ensures consistency between reported and persisted updates
               }
             }
           } else {
-            // If Firestore is not available, just collect updates
-            console.log(`Firestore not available. Collected ${updates.length} updates for ${university.name}`);
-            allUpdates.push(...updates);
+            // If Firestore is not available, don't report false positives
+            // Only log that Firestore is unavailable
+            console.log(`Firestore not available. Skipping updates for ${university.name}`);
+            // Do NOT add to allUpdates when Firestore is unavailable
           }
         } catch (error) {
           console.error(`Error fetching updates for ${university.name}:`, error);
@@ -84,17 +86,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 createdAt: Timestamp.now(),
                 updatedAt: Timestamp.now(),
               });
+              // Only add to allUpdates if successfully saved to Firestore
               allUpdates.push(update);
               console.log(`Added new JAMB update: ${update.title}`);
             }
           } catch (error) {
             console.error(`Error checking/adding JAMB update ${update.id}:`, error);
-            allUpdates.push(update);
+            // Do NOT add to allUpdates if Firestore save failed
+            // This ensures consistency between reported and persisted updates
           }
         }
       } else {
-        console.log(`Firestore not available. Collected ${jambUpdates.length} JAMB updates`);
-        allUpdates.push(...jambUpdates);
+        // If Firestore is not available, don't report false positives
+        console.log(`Firestore not available. Skipping JAMB updates`);
+        // Do NOT add to allUpdates when Firestore is unavailable
       }
     } catch (error) {
       console.error('Error fetching JAMB updates:', error);

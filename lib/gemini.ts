@@ -1,35 +1,22 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Get API key at runtime, not module load time
-function getApiKey(): string {
-  return process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
+// Initialize Gemini AI (server-side only - more secure)
+const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+
+if (!apiKey) {
+  console.warn('Warning: GEMINI_API_KEY is not set. AI features will not work properly.');
 }
 
-function getGenAI() {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    return null;
-  }
-  try {
-    return new GoogleGenerativeAI(apiKey);
-  } catch (error) {
-    console.error('Error initializing Gemini AI:', error);
-    return null;
-  }
-}
+const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+const model = genAI ? genAI.getGenerativeModel({ model: 'gemini-1.5-flash' }) : null;
 
 export async function summarizeText(text: string): Promise<string> {
-  const apiKey = getApiKey();
-  const genAI = getGenAI();
-  
-  // If no API key, return truncated text immediately
-  if (!genAI || !apiKey) {
+  // If no API key or model, return truncated text immediately
+  if (!model || !apiKey) {
     return text.substring(0, 150) + '...';
   }
 
   try {
-    // Use the current Gemini model (gemini-1.5-flash is faster and free, gemini-1.5-pro is more capable)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const prompt = `Summarize the following text in 2-3 sentences. Focus on the key information: ${text}`;
     
     const result = await model.generateContent(prompt);
@@ -47,19 +34,12 @@ export async function summarizeText(text: string): Promise<string> {
 }
 
 export async function chatWithGemini(userMessage: string, context?: string): Promise<string> {
-  const apiKey = getApiKey();
-  const genAI = getGenAI();
-  
-  // If no API key, return helpful error message
-  if (!genAI || !apiKey) {
+  // If no API key or model, return helpful error message
+  if (!model || !apiKey) {
     return "I'm sorry, the AI service is currently unavailable. Please check the API configuration. For now, you can visit our homepage to see the latest updates from Nigerian universities and JAMB.";
   }
 
   try {
-    // Use the current Gemini model (gemini-1.5-flash is faster and free, gemini-1.5-pro is more capable)
-    // Updated: 2024 - gemini-pro is deprecated, using gemini-1.5-flash
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    
     const systemPrompt = `You are CampusAI, a helpful assistant for Nigerian university students and JAMB candidates. 
     Provide accurate, helpful information about Nigerian universities and JAMB updates.
     ${context ? `Context: ${context}` : ''}
