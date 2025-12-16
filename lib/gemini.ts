@@ -44,11 +44,41 @@ function getModel(): GenerativeModel | null {
   
   try {
     genAI = new GoogleGenerativeAI(apiKey);
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Gemini AI model initialized successfully');
+    
+    // Use available models from the API - updated to use models that actually exist
+    // Based on available models: gemini-2.5-flash, gemini-flash-latest, gemini-pro-latest
+    // Try in order of preference: latest stable flash, then latest pro, then stable versions
+    const modelNamesToTry = [
+      'gemini-2.5-flash',        // Stable, fast, recommended
+      'gemini-flash-latest',     // Always latest flash version
+      'gemini-2.0-flash',       // Stable 2.0 version
+      'gemini-pro-latest',       // Latest pro version
+      'gemini-2.5-pro',          // Stable pro version
+    ];
+    
+    let lastError: any = null;
+    
+    for (const modelName of modelNamesToTry) {
+      try {
+        const testModel = genAI.getGenerativeModel({ model: modelName });
+        // Just create the model object - actual API call will happen when used
+        model = testModel;
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Gemini AI model initialized successfully: ${modelName}`);
+        }
+        return model;
+      } catch (error: any) {
+        lastError = error;
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`Failed to initialize ${modelName}:`, error.message?.substring(0, 100));
+        }
+        // Continue to next model
+        continue;
+      }
     }
-    return model;
+    
+    // If all models failed, throw the last error
+    throw lastError || new Error('No available models found');
   } catch (error: any) {
     // Gracefully handle initialization errors
     console.error('Error initializing Gemini AI:', error.message || error);
@@ -233,6 +263,14 @@ export async function chatWithGemini(userMessage: string, context?: string): Pro
     const response = await result.response;
     return response.text();
   } catch (error: any) {
+    // Handle rate limiting (429 errors)
+    if (error.status === 429 || error.message?.includes('429') || error.message?.includes('quota') || error.message?.includes('Too Many Requests')) {
+      const retryAfter = error.message?.match(/retry in (\d+)/)?.[1] || '60';
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Rate limit exceeded. Please wait ${retryAfter} seconds before trying again.`);
+      }
+      return `I'm sorry, I'm receiving too many requests right now. Please wait about ${retryAfter} seconds and try again. The free tier allows 5 requests per minute. You can visit our homepage to see the latest updates from Nigerian universities and JAMB while you wait.`;
+    }
     // Log error details for debugging
     console.error('Error in chat:', {
       status: error.status,
@@ -249,6 +287,7 @@ export async function chatWithGemini(userMessage: string, context?: string): Pro
       return "I'm sorry, there's an issue with the AI model configuration. Please ensure you're using a valid Gemini API key and the latest model names.";
     }
     
+    // Rate limiting is already handled above, so this is for other errors
     return "I'm sorry, I'm having trouble processing your request right now. Please try again later or check your internet connection.";
   }
 }
