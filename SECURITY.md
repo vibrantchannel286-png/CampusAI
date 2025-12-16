@@ -12,13 +12,15 @@
 ✅ Pre-commit hook prevents accidental commits of `.env` files
 
 **Latest Verification Results (as of latest check):**
+- `git ls-files --error-unmatch .env.local` returns error (file is NOT tracked)
 - `git check-ignore -v .env.local` confirms file is ignored (`.gitignore:31:.env.*`)
-- `git ls-files .env.local` returns empty (file is NOT tracked)
-- `git log --all --source --full-history -- .env.local` returns empty (no history)
-- `git diff HEAD -- .env.local` returns empty (not in working tree diff)
-- `git diff --cached -- .env.local` returns empty (not staged)
-- `git log --diff-filter=A -- .env.local` returns empty (never added to git)
+- `git log --all --source --full-history -- .env.local` returns empty (0 commits found)
+- `git rev-list --objects --all` shows 0 objects containing `.env.local`
+- `git status --porcelain .env.local` returns empty (not in working tree)
 - **Conclusion**: `.env.local` exists locally but is NOT in version control. Credentials are safe and have NEVER been committed.
+
+**Verification Script:**
+Run `.\verify-env-security.ps1` anytime to verify `.env.local` is not in git.
 
 ## If Secrets Were Ever Committed
 

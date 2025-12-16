@@ -7,7 +7,18 @@ let model: GenerativeModel | null = null;
 let initializationAttempted = false;
 
 function getApiKey(): string {
-  return process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+  // Check both server-side and client-side environment variables
+  const serverKey = process.env.GEMINI_API_KEY;
+  const publicKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  
+  // Log in development to help debug
+  if (process.env.NODE_ENV === 'development' && !serverKey && !publicKey) {
+    console.warn('[Gemini] No API key found in environment variables');
+    console.warn('[Gemini] Checked GEMINI_API_KEY:', serverKey ? 'SET' : 'NOT SET');
+    console.warn('[Gemini] Checked NEXT_PUBLIC_GEMINI_API_KEY:', publicKey ? 'SET' : 'NOT SET');
+  }
+  
+  return serverKey || publicKey || '';
 }
 
 function getModel(): GenerativeModel | null {
@@ -21,16 +32,29 @@ function getModel(): GenerativeModel | null {
   
   if (!apiKey) {
     console.warn('Warning: GEMINI_API_KEY is not set. AI features will not work properly.');
+    console.warn('Checked: GEMINI_API_KEY =', process.env.GEMINI_API_KEY ? 'SET' : 'NOT SET');
+    console.warn('Checked: NEXT_PUBLIC_GEMINI_API_KEY =', process.env.NEXT_PUBLIC_GEMINI_API_KEY ? 'SET' : 'NOT SET');
     return null;
+  }
+  
+  // Log that API key was found (but don't log the actual key)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Gemini API key found, initializing model...');
   }
   
   try {
     genAI = new GoogleGenerativeAI(apiKey);
     model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Gemini AI model initialized successfully');
+    }
     return model;
   } catch (error: any) {
     // Gracefully handle initialization errors
     console.error('Error initializing Gemini AI:', error.message || error);
+    if (error.stack) {
+      console.error('Stack trace:', error.stack);
+    }
     genAI = null;
     model = null;
     return null;
@@ -190,6 +214,10 @@ export async function chatWithGemini(userMessage: string, context?: string): Pro
   
   // If no API key or model, return helpful error message
   if (!currentModel || !apiKey) {
+    // Log detailed error in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Chatbot unavailable - Model:', currentModel ? 'OK' : 'NULL', 'API Key:', apiKey ? 'SET' : 'MISSING');
+    }
     return "I'm sorry, the AI service is currently unavailable. Please check the API configuration. For now, you can visit our homepage to see the latest updates from Nigerian universities and JAMB.";
   }
 
