@@ -32,6 +32,21 @@ export default function NewsCard({ update, showUniversity = false }: NewsCardPro
       
       <p className="text-gray-700 mb-4 leading-relaxed">{update.summary}</p>
       
+      {/* Key Points */}
+      {update.keyPoints && update.keyPoints.length > 0 && (
+        <div className="mb-4 bg-gray-50 rounded-lg p-4 border-l-4 border-[#008751]">
+          <h4 className="text-sm font-semibold text-gray-900 mb-2">Key Points:</h4>
+          <ul className="space-y-1">
+            {update.keyPoints.map((point, index) => (
+              <li key={index} className="text-sm text-gray-700 flex items-start">
+                <span className="text-[#008751] mr-2">•</span>
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
       <div className="flex flex-wrap gap-3 items-center">
         <a
           href={update.sourceUrl}

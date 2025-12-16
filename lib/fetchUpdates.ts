@@ -1,4 +1,4 @@
-import { summarizeText } from './gemini';
+import { formatUpdate } from './gemini';
 import universitiesData from './universities.json';
 import jambData from './jamb.json';
 
@@ -20,6 +20,7 @@ export interface Update {
   deadline?: string | null;
   universitySlug?: string;
   universityName?: string;
+  keyPoints?: string[];
 }
 
 // Simulated function to fetch updates from universities
@@ -44,19 +45,24 @@ export async function fetchUniversityUpdates(slug?: string): Promise<Update[]> {
       
       for (let i = 0; i < 5; i++) {
         const fullText = `This is a sample update from ${university.name}. The university has announced important information regarding ${sampleTitles[i]}. Students are advised to check the official website for more details.`;
-        const summary = await summarizeText(fullText).catch(() => 
-          fullText.substring(0, 150) + '...'
-        );
+        
+        // Use formatUpdate to get professional formatting with title, summary, and key points
+        const formatted = await formatUpdate(fullText).catch(() => ({
+          title: sampleTitles[i],
+          summary: fullText.substring(0, 150) + '...',
+          keyPoints: []
+        }));
         
         updates.push({
           id: `${slug}-${i + 1}`,
-          title: sampleTitles[i],
+          title: formatted.title,
           date: new Date(Date.now() - i * 86400000).toISOString().split('T')[0],
-          summary,
+          summary: formatted.summary,
           fullText,
           sourceUrl: university.url,
           universitySlug: slug,
           universityName: university.name,
+          keyPoints: formatted.keyPoints,
         });
       }
     }
@@ -67,19 +73,24 @@ export async function fetchUniversityUpdates(slug?: string): Promise<Update[]> {
     for (let index = 0; index < sampleUniversities.length; index++) {
       const university = sampleUniversities[index];
       const fullText = `Latest update from ${university.name}. Important announcements and news for students.`;
-      const summary = await summarizeText(fullText).catch(() => 
-        fullText.substring(0, 150) + '...'
-      );
+      
+      // Use formatUpdate to get professional formatting with title, summary, and key points
+      const formatted = await formatUpdate(fullText).catch(() => ({
+        title: `Latest Updates from ${university.name}`,
+        summary: fullText.substring(0, 150) + '...',
+        keyPoints: []
+      }));
       
       updates.push({
         id: `${university.slug}-${Date.now()}-${index}`,
-        title: `Latest Updates from ${university.name}`,
+        title: formatted.title,
         date: new Date().toISOString().split('T')[0],
-        summary,
+        summary: formatted.summary,
         fullText,
         sourceUrl: university.url,
         universitySlug: university.slug,
         universityName: university.name,
+        keyPoints: formatted.keyPoints,
       });
     }
   }
