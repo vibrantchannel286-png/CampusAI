@@ -10,7 +10,7 @@ Make sure `NEXT_PUBLIC_GEMINI_API_KEY` is set correctly in Vercel:
 2. Navigate to **Settings** → **Environment Variables**
 3. Verify `NEXT_PUBLIC_GEMINI_API_KEY` exists
 4. Check that it's enabled for **Production**, **Preview**, and **Development**
-5. The value should be: `AIzaSyB7D3L0eko5Rak1ucas0CMjj4iYoXuODZY`
+
 
 ### 2. **Clear Build Cache and Redeploy**
 
