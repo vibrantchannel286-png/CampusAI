@@ -7,8 +7,10 @@
 ## Free Tier Limits
 
 - **5 requests per minute** per model
+- **20 requests per day** per model (daily quota)
 - This applies to each model separately (gemini-2.5-flash, gemini-pro-latest, etc.)
-- After 5 requests, you must wait about 60 seconds before making more requests
+- After 5 requests per minute, you must wait about 60 seconds before making more requests
+- After 20 requests per day, you must wait until the next day (quota resets daily)
 
 ## What This Means
 

@@ -6,6 +6,10 @@ let genAI: GoogleGenerativeAI | null = null;
 let model: GenerativeModel | null = null;
 let initializationAttempted = false;
 
+// Track daily quota exhaustion to avoid repeated API calls
+let dailyQuotaExhausted = false;
+let dailyQuotaResetTime = 0; // Timestamp when quota resets (next day)
+
 function getApiKey(): string {
   // Check both server-side and client-side environment variables
   const serverKey = process.env.GEMINI_API_KEY;
@@ -125,6 +129,22 @@ export interface FormattedUpdate {
 }
 
 export async function formatUpdate(updateText: string): Promise<FormattedUpdate> {
+  // Check if daily quota was exhausted and hasn't reset yet
+  if (dailyQuotaExhausted && Date.now() < dailyQuotaResetTime) {
+    // Use fallback formatting without making API call
+    const lines = updateText.split('\n').filter(line => line.trim());
+    return {
+      title: lines[0]?.substring(0, 100) || 'Update',
+      summary: updateText.substring(0, 200) + '...',
+      keyPoints: lines.slice(1, 4).map(line => line.trim()).filter(Boolean)
+    };
+  }
+  
+  // Reset flag if we've passed the reset time
+  if (dailyQuotaExhausted && Date.now() >= dailyQuotaResetTime) {
+    dailyQuotaExhausted = false;
+  }
+  
   // Lazy initialization with error handling
   const currentModel = getModel();
   const apiKey = getApiKey();
@@ -223,11 +243,36 @@ Key Points:
     
     return { title, summary, keyPoints };
   } catch (error: any) {
-    // Fallback to basic formatting on error
+    // Handle rate limiting gracefully - don't log as error, just use fallback
+    if (error.status === 429 || error.message?.includes('429') || error.message?.includes('quota') || error.message?.includes('Too Many Requests')) {
+      // Check if this is a daily quota limit (limit: 20)
+      const isDailyLimit = error.message?.includes('limit: 20') || error.message?.includes('GenerateRequestsPerDay');
+      
+      if (isDailyLimit) {
+        // Mark daily quota as exhausted and set reset time to next day (24 hours from now)
+        dailyQuotaExhausted = true;
+        dailyQuotaResetTime = Date.now() + (24 * 60 * 60 * 1000); // 24 hours from now
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[Gemini] Daily quota (20 requests/day) exhausted. Skipping AI formatting until tomorrow.');
+        }
+      }
+      
+      // Rate limit hit - use fallback formatting without logging
+      const lines = updateText.split('\n').filter(line => line.trim());
+      return {
+        title: lines[0]?.substring(0, 100) || 'Update',
+        summary: updateText.substring(0, 200) + '...',
+        keyPoints: lines.slice(1, 4).map(line => line.trim()).filter(Boolean)
+      };
+    }
+    
+    // Log other errors only in development
     if (process.env.NODE_ENV === 'development' && error.status !== 404) {
       console.error('Error formatting update:', error.message || error);
     }
     
+    // Fallback to basic formatting on error
     const lines = updateText.split('\n').filter(line => line.trim());
     return {
       title: lines[0]?.substring(0, 100) || 'Update',

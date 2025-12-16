@@ -47,6 +47,12 @@ export async function fetchUniversityUpdates(slug?: string): Promise<Update[]> {
         const fullText = `This is a sample update from ${university.name}. The university has announced important information regarding ${sampleTitles[i]}. Students are advised to check the official website for more details.`;
         
         // Use formatUpdate to get professional formatting with title, summary, and key points
+        // Add delay to avoid hitting rate limits when processing multiple updates
+        // Free tier: 5 requests per minute, so space them out (12 seconds between requests)
+        if (i > 0) {
+          await new Promise(resolve => setTimeout(resolve, 12000)); // 12 second delay to stay under 5/min limit
+        }
+        
         const formatted = await formatUpdate(fullText).catch(() => ({
           title: sampleTitles[i],
           summary: fullText.substring(0, 150) + '...',
@@ -68,11 +74,18 @@ export async function fetchUniversityUpdates(slug?: string): Promise<Update[]> {
     }
   } else {
     // Generate updates for all universities (limited sample)
-    const sampleUniversities = universitiesData.slice(0, 10);
+    // Limit to 3 updates to avoid hitting daily quota (20 requests/day free tier)
+    const sampleUniversities = universitiesData.slice(0, 3);
     
     for (let index = 0; index < sampleUniversities.length; index++) {
       const university = sampleUniversities[index];
       const fullText = `Latest update from ${university.name}. Important announcements and news for students.`;
+      
+      // Add delay to avoid hitting rate limits when processing multiple updates
+      // Free tier: 5 requests per minute, so space them out (12 seconds between requests)
+      if (index > 0) {
+        await new Promise(resolve => setTimeout(resolve, 12000)); // 12 second delay to stay under 5/min limit
+      }
       
       // Use formatUpdate to get professional formatting with title, summary, and key points
       const formatted = await formatUpdate(fullText).catch(() => ({
