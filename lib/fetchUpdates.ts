@@ -46,18 +46,35 @@ export async function fetchUniversityUpdates(slug?: string): Promise<Update[]> {
       for (let i = 0; i < 5; i++) {
         const fullText = `This is a sample update from ${university.name}. The university has announced important information regarding ${sampleTitles[i]}. Students are advised to check the official website for more details.`;
         
-        // Use formatUpdate to get professional formatting with title, summary, and key points
-        // Add delay to avoid hitting rate limits when processing multiple updates
-        // Free tier: 5 requests per minute, so space them out (12 seconds between requests)
-        if (i > 0) {
-          await new Promise(resolve => setTimeout(resolve, 12000)); // 12 second delay to stay under 5/min limit
-        }
+        // Skip AI formatting during build time to avoid timeouts and rate limits
+        // Use AI formatting only in development or when explicitly requested
+        const useAIFormatting = process.env.NODE_ENV === 'development' && !process.env.SKIP_AI_FORMATTING;
         
-        const formatted = await formatUpdate(fullText).catch(() => ({
-          title: sampleTitles[i],
-          summary: fullText.substring(0, 150) + '...',
-          keyPoints: []
-        }));
+        let formatted;
+        if (useAIFormatting) {
+          // Add delay to avoid hitting rate limits when processing multiple updates
+          // Free tier: 5 requests per minute, so space them out (12 seconds between requests)
+          if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, 12000)); // 12 second delay to stay under 5/min limit
+          }
+          
+          formatted = await formatUpdate(fullText).catch(() => ({
+            title: sampleTitles[i],
+            summary: fullText.substring(0, 150) + '...',
+            keyPoints: []
+          }));
+        } else {
+          // Use fast fallback formatting during build/production
+          formatted = {
+            title: sampleTitles[i],
+            summary: fullText.substring(0, 150) + '...',
+            keyPoints: [
+              'Students are advised to check the official website',
+              'Important information regarding university updates',
+              'Stay informed about latest announcements'
+            ]
+          };
+        }
         
         updates.push({
           id: `${slug}-${i + 1}`,
@@ -81,18 +98,35 @@ export async function fetchUniversityUpdates(slug?: string): Promise<Update[]> {
       const university = sampleUniversities[index];
       const fullText = `Latest update from ${university.name}. Important announcements and news for students.`;
       
-      // Add delay to avoid hitting rate limits when processing multiple updates
-      // Free tier: 5 requests per minute, so space them out (12 seconds between requests)
-      if (index > 0) {
-        await new Promise(resolve => setTimeout(resolve, 12000)); // 12 second delay to stay under 5/min limit
-      }
+      // Skip AI formatting during build time to avoid timeouts and rate limits
+      // Use AI formatting only in development or when explicitly requested
+      const useAIFormatting = process.env.NODE_ENV === 'development' && !process.env.SKIP_AI_FORMATTING;
       
-      // Use formatUpdate to get professional formatting with title, summary, and key points
-      const formatted = await formatUpdate(fullText).catch(() => ({
-        title: `Latest Updates from ${university.name}`,
-        summary: fullText.substring(0, 150) + '...',
-        keyPoints: []
-      }));
+      let formatted;
+      if (useAIFormatting) {
+        // Add delay to avoid hitting rate limits when processing multiple updates
+        // Free tier: 5 requests per minute, so space them out (12 seconds between requests)
+        if (index > 0) {
+          await new Promise(resolve => setTimeout(resolve, 12000)); // 12 second delay to stay under 5/min limit
+        }
+        
+        formatted = await formatUpdate(fullText).catch(() => ({
+          title: `Latest Updates from ${university.name}`,
+          summary: fullText.substring(0, 150) + '...',
+          keyPoints: []
+        }));
+      } else {
+        // Use fast fallback formatting during build/production
+        formatted = {
+          title: `Latest Updates from ${university.name}`,
+          summary: fullText.substring(0, 150) + '...',
+          keyPoints: [
+            'Important announcements for students',
+            'Stay informed about university news',
+            'Check official website for details'
+          ]
+        };
+      }
       
       updates.push({
         id: `${university.slug}-${Date.now()}-${index}`,
