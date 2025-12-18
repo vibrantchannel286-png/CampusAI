@@ -27,7 +27,7 @@ You need to add **TWO** environment variables:
 #### Variable 1: `NEXT_PUBLIC_GEMINI_API_KEY`
 1. Click **"Add New"** button
 2. **Key**: `NEXT_PUBLIC_GEMINI_API_KEY`
-3. **Value**: Your Gemini API key (e.g., `AIzaSyDQYfmSawG0APZR4f1b3hnLwi9el5TAx-E`)
+3. **Value**: Your Gemini API key 
 4. **Environment**: Select all three:
    - ✅ Production
    - ✅ Preview
