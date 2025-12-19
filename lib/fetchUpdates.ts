@@ -2,7 +2,7 @@ import { formatUpdate } from './gemini';
 import universitiesData from './universities.json';
 import jambData from './jamb.json';
 import axios from 'axios';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 
 export interface University {
   name: string;
@@ -120,7 +120,11 @@ async function scrapeUiUpdates(): Promise<Update[]> {
 // --- Scraper for Federal University of Technology Akure (FUTA) ---
 async function scrapeFutaUpdates(): Promise<Update[]> {
   try {
-    const { data } = await axios.get('https://futa.edu.ng/news-events/');
+    const { data } = await axios.get('https://futa.edu.ng/news-events/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+      }
+    });
     const $ = cheerio.load(data);
     const updates: Update[] = [];
     const articles = $('div.news-post-item').get();
@@ -216,8 +220,8 @@ async function scrapeAbuUpdates(): Promise<Update[]> {
 const scraperRegistry: { [slug: string]: () => Promise<Update[]> } = {
   'unilag': scrapeUnilagUpdates,
   'ui': scrapeUiUpdates,
-  'futa': scrapeFutaUpdates,
-  'abu': scrapeAbuUpdates,
+  // 'futa': scrapeFutaUpdates, // Temporarily disabled
+  // 'abu': scrapeAbuUpdates, // Temporarily disabled
 };
 
 // --- Main Function to Fetch University Updates ---
