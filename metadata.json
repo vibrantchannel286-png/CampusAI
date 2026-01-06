@@ -1,0 +1,7 @@
+{
+  "name": "CampusAI.ng - Nigerian University Updates",
+  "description": "An AI-powered platform providing the latest updates for Nigerian universities, JAMB, and educational news, featuring an intelligent assistant for student inquiries.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
